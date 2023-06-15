@@ -97,8 +97,22 @@ module.exports = {
 ## 👇 例子
 
 
+- 如果你页面在目录 ` src/pages/system/setting/purchase_setting`, 那么会自动提示对应的路由方法
 
- 
+![](./assets/method_tip.gif)
+
+- 如果你在页面同目录下添加了如 `index.params.ts` 作为页面的参数类型, 那么当天调用方法并传参时，会有对应的类型提示
+
+```ts
+// order_detail/index.params.ts
+export default interface Params {
+  /** 这是订单id */
+  id: string
+}
+```
+  
+
+![](./assets/params_tip.gif)
 
 ## 📄 协议
 

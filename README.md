@@ -100,6 +100,20 @@ module.exports = {
 
 ## 👇 Example
 
+- if your page is in the directory ` src/pages/system/setting/purchase_setting`, then it will auto tip method from the pages directory
+
+![](./assets/method_tip.gif)
+
+- if you add `index.params.ts` for page params, then when you pass params, it will tip type
+  
+```ts
+// order_detail/index.params.ts
+export default interface Params {
+  /** 这是订单id */
+  id: string
+}
+```
+![](./assets/params_tip.gif)
 
 ## 📄 License
 
