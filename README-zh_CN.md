@@ -42,12 +42,12 @@ npm i genetate-history-method-webpack-plugin -D
 interface GenerateHistoryMethodWebpackPluginOptions {
   /**
    * @description 用来定义路由参数类型的文件名
-   * @default index.params.ts
+   * @default index.params
    *  */
   paramsName?: string
   /**
    * @description 用来识别是路由页面的文件名
-   * @default index.page.tsx
+   * @default index.page
    */
   pageName?: string
   /**

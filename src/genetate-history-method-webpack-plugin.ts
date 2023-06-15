@@ -1,6 +1,6 @@
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
-import path from 'node:path'
-import { globSync } from 'glob'
+import { existsSync, readFileSync, writeFileSync } from 'fs'
+import path from 'path'
+import glob from 'glob'
 import type { Compiler } from 'webpack'
 const cwdPath = process.cwd()
 
@@ -9,12 +9,12 @@ type HistoryMode = 'hash' | 'browser'
 interface GenerateHistoryMethodWebpackPluginOptions {
   /**
    * @description The name of the file defining the route parameter type, must be .ts
-   * @default index.params.ts
+   * @default index.params
    *  */
   paramsName?: string
   /**
    * @description Identify is the filename of the routed page
-   * @default index.page.tsx
+   * @default index.page
    */
   pageName?: string
   /**
@@ -76,29 +76,35 @@ class GenerateHistoryMethodWebpackPlugin {
     compiler.hooks.beforeCompile.tap(
       GenerateHistoryMethodWebpackPlugin.name,
       () => {
-        const filePattern = `${this._pagesRootPath}/**/${this._pageName}` // 匹配的文件模式
+        const filePattern = `${this._pagesRootPath}/**/${this._pageName}.{tsx,js,jsx}` // 匹配的文件模式
+        // @ts-ignore
+        glob(filePattern, (err: Error, files: string[]) => {
+          if (err) {
+            console.error(err)
+            process.exit(1)
+          }
+          const isExistTS = files.some(file => /\.tsx?/.test(path.extname(file)))
 
-        try {
-          const files = globSync(filePattern)
           const content = [
-            `import originHistory from '${this._originHistoryModuleName}'`,
-            'import qs from \'qs\'\n',
+              `import originHistory from '${this._originHistoryModuleName}'`,
+              'import qs from \'qs\'\n',
           ]
           const paramsMap: Record<string, string> = {}
+          const regExp = new RegExp(`\/${this._pageName.replace(/(?=\.)/g, '\\')}\.(tsx|jsx?)$`)
           const urlObj = files.reduce<Record<string, string>>((pre, path) => {
             const urlPath = path
               .replace(this._pagesRootPath, '')
-              .replace(/\/index\.page\.tsx$/, '')
+              .replace(regExp, '')
             const formatPath = urlPath
               .slice(1)
               .toUpperCase()
               .replace(/\//g, '_')
 
-            pre[formatPath] = `${isHash ? '#' : ''}${urlPath}`
+            pre[formatPath] = urlPath
 
             const possibleParamsPath = path.replace(
-              /index\.page\.tsx$/,
-              `${this._paramsName}.ts`,
+              regExp,
+                `${this._paramsName}.ts`,
             )
             if (existsSync(possibleParamsPath))
               paramsMap[formatPath] = possibleParamsPath.replace('.ts', '')
@@ -107,31 +113,33 @@ class GenerateHistoryMethodWebpackPlugin {
           const urlKeys = Object.keys(urlObj)
 
           content.push(
-            `export const URL_MAP = ${JSON.stringify(urlObj, null, 2)}\n`,
+              `export const URL_MAP = ${JSON.stringify(urlObj, null, 2)}\n`,
+              `const formatUrlFn = (path${isExistTS ? ': string' : ''}, query${isExistTS ? ': any' : ''}) => path + (query ? \'?\' + qs.stringify(query || {}): \'\')`,
           )
           const methods = []
           const PathParamsTypeArrs = []
           for (const urlKey of urlKeys) {
             if (paramsMap[urlKey]) {
               PathParamsTypeArrs.push(
-                `import ${urlKey}_Params from '${paramsMap[urlKey]}'`,
+                  `import ${urlKey}_Params from '${paramsMap[urlKey]}'`,
               )
             }
-            const queryType = paramsMap[urlKey] ? `${urlKey}_Params` : 'any'
+            let queryType = ''
+            if (isExistTS)
+              queryType = `?: ${paramsMap[urlKey] ? `${urlKey}_Params` : 'any'}`
+
             const realUrl = `URL_MAP['${urlKey}']`
-            const pushOrReplaceUrl = isHash ? realUrl.replace(/^#/, '') : realUrl
-            const stringifyQuery = '(query ? \'?\' + qs.stringify(query || {}): \'\')'
 
             methods.push(
-              `  TO_${urlKey}: (query?: ${queryType}) => {
-    originHistory.push(${pushOrReplaceUrl} + ${stringifyQuery})
-  },`,
-              `  OPEN_${urlKey}: (query?: ${queryType}) => {
-    window.open(${realUrl} + ${stringifyQuery})
-  },`,
-              `  REPLACE_${urlKey}: (query?: ${queryType}) => {
-    originHistory.replace(${pushOrReplaceUrl} + ${stringifyQuery})
-  },`,
+                `  TO_${urlKey}: (query${queryType}) => {
+      originHistory.push(formatUrlFn(${realUrl}, query))
+    },`,
+                `  OPEN_${urlKey}: (query${queryType}) => {
+      window.open(formatUrlFn('${isHash ? '#' : ''}' + ${realUrl}, query))
+    },`,
+                `  REPLACE_${urlKey}: (query${queryType}) => {
+      originHistory.replace(formatUrlFn(${realUrl}, query))
+    },`,
             )
           }
           content.unshift(...PathParamsTypeArrs)
@@ -141,10 +149,9 @@ class GenerateHistoryMethodWebpackPlugin {
           content.push('export default history')
 
           const contentStr = content.join('\n')
-
           const outputPath = path.resolve(
             cwdPath,
-            `node_modules/${this._historyModuleName}.ts`,
+              `node_modules/${this._historyModuleName}.${isExistTS ? 'ts' : 'js'}`,
           ) // 输出文件路径
           if (existsSync(outputPath)) {
             // 已存在则对比是否变化，没变化则没必要写入
@@ -153,11 +160,7 @@ class GenerateHistoryMethodWebpackPlugin {
               return
           }
           writeFileSync(outputPath, contentStr)
-        }
-        catch (e: unknown) {
-          console.error((e as Error).message)
-          process.exit(1)
-        }
+        })
       },
     )
   }

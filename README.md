@@ -44,12 +44,12 @@ npm i genetate-history-method-webpack-plugin -D
 interface GenerateHistoryMethodWebpackPluginOptions {
   /**
    * @description The name of the file defining the route parameter type, must be .ts
-   * @default index.params.ts
+   * @default index.params
    *  */
   paramsName?: string
   /**
    * @description Identify is the filename of the routed page
-   * @default index.page.tsx
+   * @default index.page
    */
   pageName?: string
   /**
