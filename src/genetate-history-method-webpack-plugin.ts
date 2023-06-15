@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs'
-import path from 'path'
+import { extname, resolve } from 'path'
+
 import glob from 'glob'
 import type { Compiler } from 'webpack'
 const cwdPath = process.cwd()
@@ -77,13 +78,13 @@ class GenerateHistoryMethodWebpackPlugin {
       GenerateHistoryMethodWebpackPlugin.name,
       () => {
         const filePattern = `${this._pagesRootPath}/**/${this._pageName}.{tsx,js,jsx}` // 匹配的文件模式
-        // @ts-ignore
-        glob(filePattern, (err: Error, files: string[]) => {
+
+        glob(filePattern, (err, files) => {
           if (err) {
-            console.error(err)
-            process.exit(1)
+            console.warn(err)
+            return
           }
-          const isExistTS = files.some(file => /\.tsx?/.test(path.extname(file)))
+          const isExistTS = files.some(file => /\.tsx?/.test(extname(file)))
 
           const content = [
               `import originHistory from '${this._originHistoryModuleName}'`,
@@ -149,7 +150,7 @@ class GenerateHistoryMethodWebpackPlugin {
           content.push('export default history')
 
           const contentStr = content.join('\n')
-          const outputPath = path.resolve(
+          const outputPath = resolve(
             cwdPath,
               `node_modules/${this._historyModuleName}.${isExistTS ? 'ts' : 'js'}`,
           ) // 输出文件路径
