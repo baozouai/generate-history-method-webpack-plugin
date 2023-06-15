@@ -29,7 +29,6 @@
     "clean": "rm -rf dist",
     "lint": "eslint . --fix",
     "build": "tsc",
-    "test": "vitest",
     "tag": "bumpp",
     "prepublishOnly": "npm run clean && npm run build",
     "release": "npm publish",
