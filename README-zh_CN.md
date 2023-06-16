@@ -36,6 +36,16 @@ yarn add genetate-history-method-webpack-plugin -D
 # or
 npm i genetate-history-method-webpack-plugin -D
 ```
+
+确保你的依赖有`qs`，否则请安装
+
+```sh
+pnpm add qs -D
+# or
+yarn add qs -D
+# or
+npm i qs -D
+```
 ## ⚙️ 参数
 
 ```ts

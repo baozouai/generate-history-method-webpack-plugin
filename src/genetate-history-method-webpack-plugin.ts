@@ -1,5 +1,5 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs'
-import { extname, resolve } from 'path'
+import { dirname, extname, resolve } from 'path'
 
 import glob from 'glob'
 import type { Compiler } from 'webpack'
@@ -102,9 +102,9 @@ class GenerateHistoryMethodWebpackPlugin {
               .replace(/\//g, '_')
 
             pre[formatPath] = urlPath
-
-            const possibleParamsPath = path.replace(
-              regExp,
+            const dir = dirname(path)
+            const possibleParamsPath = resolve(
+              dir,
                 `${this._paramsName}.ts`,
             )
             if (existsSync(possibleParamsPath))
@@ -117,8 +117,8 @@ class GenerateHistoryMethodWebpackPlugin {
               `export const URL_MAP = ${JSON.stringify(urlObj, null, 2)}\n`,
               `const formatUrlFn = (path${isExistTS ? ': string' : ''}, query${isExistTS ? ': any' : ''}) => path + (query ? \'?\' + qs.stringify(query || {}): \'\')`,
           )
-          const methods = []
-          const PathParamsTypeArrs = []
+          const methods: string[] = []
+          const PathParamsTypeArrs: string[] = []
           for (const urlKey of urlKeys) {
             if (paramsMap[urlKey]) {
               PathParamsTypeArrs.push(

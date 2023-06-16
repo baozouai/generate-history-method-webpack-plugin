@@ -37,6 +37,17 @@ yarn add genetate-history-method-webpack-plugin -D
 npm i genetate-history-method-webpack-plugin -D
 ```
 
+make sure your dependencies have `qs`，otherwise please install
+
+```sh
+pnpm add qs -D
+# or
+yarn add qs -D
+# or
+npm i qs -D
+```
+
+
 
 ## ⚙️ Options
 

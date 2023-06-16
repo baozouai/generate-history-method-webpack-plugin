@@ -32,7 +32,8 @@
     "tag": "bumpp",
     "prepublishOnly": "npm run clean && npm run build",
     "release": "npm publish",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "demo": "nr -C playgrounds/react start"
   },
   "dependencies": {
     "glob": "7.2.0"

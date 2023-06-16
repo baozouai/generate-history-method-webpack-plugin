@@ -1,3 +1,4 @@
 *.md
 test
 vitest.config.ts
+.eslintrc.js
