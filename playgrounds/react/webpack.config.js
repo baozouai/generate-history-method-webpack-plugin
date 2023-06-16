@@ -1,6 +1,6 @@
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
-const GenerateHistoryMethodWebpackPlugin = require('../../dist/genetate-history-method-webpack-plugin').default
+const GenerateHistoryMethodWebpackPlugin = require('../../dist/genetate-history-method-webpack-plugin.cjs')
 module.exports = {
   entry: './src/index.tsx',
   output: {

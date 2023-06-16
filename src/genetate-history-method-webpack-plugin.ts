@@ -2,7 +2,7 @@ import { existsSync, readFileSync, writeFileSync } from 'fs'
 import { dirname, extname, resolve } from 'path'
 
 import glob from 'glob'
-import type { Compiler } from 'webpack'
+// import type { Compiler } from 'webpack'
 const cwdPath = process.cwd()
 
 type HistoryMode = 'hash' | 'browser'
@@ -71,9 +71,10 @@ class GenerateHistoryMethodWebpackPlugin {
     this._mode = mode
   }
 
-  apply(compiler: Compiler) {
+  apply(compiler: any) {
     const isHash = this._mode === 'hash'
-
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     compiler.hooks.beforeCompile.tap(
       GenerateHistoryMethodWebpackPlugin.name,
       () => {
@@ -87,9 +88,27 @@ class GenerateHistoryMethodWebpackPlugin {
           const isExistTS = files.some(file => /\.tsx?/.test(extname(file)))
 
           const content = [
+            'import { useLayoutEffect, useRef, useState } from \'react\'',
               `import originHistory from '${this._originHistoryModuleName}'`,
               'import qs from \'qs\'\n',
           ]
+          const useHistoryHookName = `use${isHash ? 'Hash' : 'Browser'}History`
+          content.push(`
+          export const ${useHistoryHookName} = () => {
+const historyRef = useRef(originHistory)
+
+  const history = historyRef.current
+  const [state, setState] = useState({
+    action: history.action,
+    location: history.location,
+  })
+
+  useLayoutEffect(() => {
+    history.listen(setState)
+  }, [history])
+  return [history, state] as [typeof history, typeof state]
+}
+          `)
           const paramsMap: Record<string, string> = {}
           const regExp = new RegExp(`\/${this._pageName.replace(/(?=\.)/g, '\\')}\.(tsx|jsx?)$`)
           const urlObj = files.reduce<Record<string, string>>((pre, path) => {
