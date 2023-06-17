@@ -34,7 +34,14 @@
     "prepublishOnly": "npm run clean && npm run build",
     "release": "npm publish",
     "prepare": "husky install",
-    "demo": "nr -C playgrounds/react start"
+    "demo5:browser": "nr -C playgrounds/react-router-5 start:browser",
+    "demo5:hash": "nr -C playgrounds/react-router-5 start:hash",
+    "demo5:js:browser": "nr -C playgrounds/react-router-5-js start:browser",
+    "demo5:js:hash": "nr -C playgrounds/react-router-5-js start:hash",
+    "demo6:browser": "nr -C playgrounds/react-router-6 start:browser",
+    "demo6:hash": "nr -C playgrounds/react-router-6 start:hash",
+    "demo6:js:browser": "nr -C playgrounds/react-router-6-js start:browser",
+    "demo6:js:hash": "nr -C playgrounds/react-router-6-js start:hash"
   },
   "dependencies": {
     "glob": "7.2.0"
@@ -46,6 +53,7 @@
     "@types/glob": "7.2.0",
     "@types/node": "^18.15.13",
     "bumpp": "^9.1.0",
+    "cross-env": "^7.0.3",
     "cz-conventional-changelog": "^3.3.0",
     "eslint": "^8.35.0",
     "husky": "^8.0.3",
