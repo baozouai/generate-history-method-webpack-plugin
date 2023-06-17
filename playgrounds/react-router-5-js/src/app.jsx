@@ -4,7 +4,7 @@ import {
   Route,
   Switch,
 } from 'react-router-dom'
-import history, { Router } from '~history'
+import { Router, history } from '~history'
 const context = require.context('@/pages', true, /index\.page\./)
 
 const routePaths = context.keys().map((path) => {

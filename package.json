@@ -44,7 +44,8 @@
     "demo6:js:hash": "nr -C playgrounds/react-router-6-js start:hash"
   },
   "dependencies": {
-    "glob": "7.2.0"
+    "glob": "7.2.0",
+    "schema-utils": "^4.2.0"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.36.0",

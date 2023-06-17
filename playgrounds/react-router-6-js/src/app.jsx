@@ -6,7 +6,7 @@ import {
   Routes,
 } from 'react-router-dom'
 import { useNavigate } from 'react-router'
-import history, { Router } from '~history'
+import { Router, history } from '~history'
 
 const context = require.context('@/pages', true, /index\.page\./)
 

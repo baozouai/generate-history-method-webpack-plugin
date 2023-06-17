@@ -1,7 +1,9 @@
 import { existsSync, readFileSync, writeFileSync } from 'fs'
 import { dirname, extname, resolve } from 'path'
-
+import { validate } from 'schema-utils'
 import glob from 'glob'
+import schema from './schema.json'
+
 const cwdPath = process.cwd()
 
 type HistoryMode = 'hash' | 'browser'
@@ -77,6 +79,9 @@ class GenerateHistoryMethodWebpackPlugin {
       pagesRootPath,
       reactRouterVersion,
     } = options || {}
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    validate(schema as any, options)
     this.paramsName = paramsName
     this.pageName = pageName
     this.historyModuleName = historyModuleName
