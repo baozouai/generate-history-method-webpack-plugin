@@ -128,6 +128,7 @@ class GenerateHistoryMethodWebpackPlugin {
           this.generateHistory(paramsMap, urlKeys, isExistTS)
           this.generateUseSearchParamsHook(isExistTS)
 
+          this.contents.unshift('// @eslint-ignored')
           const contentStr = this.contents.join('\n')
           const outputPath = resolve(
             cwdPath,
@@ -147,7 +148,6 @@ class GenerateHistoryMethodWebpackPlugin {
 
   addTopImport() {
     this.contents.push(
-      '// @eslint-ignored',
       'import React, { useLayoutEffect, useRef, useState, ReactNode } from \'react\'',
       'import { useLocation, Router as BaseRouter } from \'react-router-dom\'',
       `import originHistory from '${this.originHistoryModuleName}'`,
