@@ -120,7 +120,7 @@ interface GenerateHistoryMethodWebpackPluginOptions {
 
 ```js
 // webpack.config.js
-const GenerateHistoryMethodWebpackPlugin = require('genetate-history-method-webpack-plugin').default
+const GenerateHistoryMethodWebpackPlugin = require('genetate-history-method-webpack-plugin')
 const path = require('path')
 
 module.exports = {
