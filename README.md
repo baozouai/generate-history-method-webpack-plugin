@@ -47,7 +47,30 @@ yarn add qs -D
 npm i qs -D
 ```
 
+Make sure to export default history under your project `src`:
 
+if you use browser mode, you can refer to [react-router-6/src/browser_history.ts](./playgrounds/react-router-6/src/browser_history.ts),  then export the history
+
+
+```ts
+import type { BrowserHistory } from 'history'
+import { createBrowserHistory } from 'history'
+
+export type { BrowserHistory }
+export default createBrowserHistory()
+
+```
+
+if you use hash mode, you can refer to [react-router-6/src/hash_history.ts](./playgrounds/react-router-6/src/hash_history.ts),  then export the history
+
+
+```ts
+import type { HashHistory } from 'history'
+import { createHashHistory } from 'history'
+
+export type { HashHistory }
+export default createHashHistory()
+```
 
 ## ⚙️ Options
 
@@ -89,6 +112,8 @@ interface GenerateHistoryMethodWebpackPluginOptions {
    * @default 'browser'
    */
   mode?: HistoryMode
+  /** the reac-router version, now support v5 and v6 */
+  reactRouterVersion: 5 | 6
 }
 ```
 ##  🔨 Usage
@@ -102,7 +127,8 @@ module.exports = {
   ...,
   plugins: [
     new GenerateHistoryMethodWebpackPlugin({
-      pagesRootPath: path.resolve(process.cwd(), 'src/pages') // must required
+      pagesRootPath: path.resolve(process.cwd(), 'src/pages') // must required,
+      reactRouterVersion: 5 | 6
     })
   ],
 }
@@ -125,6 +151,21 @@ export default interface Params {
 }
 ```
 ![](./assets/params_tip.gif)
+
+For more usage methods, please refer to playgrounds :
+
+- [react-router-6](./playgrounds/react-router-6/src/app.tsx)
+- [react-router-6-js](./playgrounds/react-router-6-js/src/app.jsx)
+- [react-router-5](./playgrounds/react-router-5/src/app.tsx)
+- [react-router-5-js](./playgrounds/react-router-5-js/src/app.jsx)
+
+
+and webpack.config.js:
+
+- [react-router-6](./playgrounds/react-router-6/webpack.config.js)
+- [react-router-6-js](./playgrounds/react-router-6-js/webpack.config.js)
+- [react-router-5](./playgrounds/react-router-5/webpack.config.js)
+- [react-router-5-js](./playgrounds/react-router-5-js/webpack.config.js)
 
 ## 📄 License
 

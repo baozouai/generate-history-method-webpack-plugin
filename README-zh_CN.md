@@ -46,6 +46,30 @@ yarn add qs -D
 # or
 npm i qs -D
 ```
+
+确保在你项目 src 下面export default对应的history：
+
+比如你使用的是browser模式，可以参考[react-router-6/src/browser_history.ts](./playgrounds/react-router-6/src/browser_history.ts)，那么导出该history
+
+```ts
+import type { BrowserHistory } from 'history'
+import { createBrowserHistory } from 'history'
+
+export type { BrowserHistory }
+export default createBrowserHistory()
+
+```
+
+比如你使用的是hash模式，可以参考[react-router-6/src/hash_history.ts](./playgrounds/react-router-6/src/hash_history.ts)，那么导出该history
+
+```ts
+import type { HashHistory } from 'history'
+import { createHashHistory } from 'history'
+
+export type { HashHistory }
+export default createHashHistory()
+
+```
 ## ⚙️ 参数
 
 ```ts
@@ -82,6 +106,9 @@ interface GenerateHistoryMethodWebpackPluginOptions {
    * @default 'browser'
    */
   mode?: HistoryMode
+  /** 
+   *  react-router 版本, 目前支持 v5 和 v6 */
+  reactRouterVersion: 5 | 6
 }
 ```
 
@@ -97,7 +124,9 @@ module.exports = {
   ...,
   plugins: [
     new GenerateHistoryMethodWebpackPlugin({
-      pagesRootPath: path.resolve(process.cwd(), 'src/pages') // pagesRootPath必填
+      pagesRootPath: path.resolve(process.cwd(),
+       'src/pages') // pagesRootPath必填,
+       reactRouterVersion: 5 | 6,
     })
   ],
 }
@@ -124,6 +153,19 @@ export default interface Params {
 
 ![](./assets/params_tip.gif)
 
+更多的使用方法可以参考playgrounds下面的 src/app:
+- [react-router-6](./playgrounds/react-router-6/src/app.tsx)
+- [react-router-6-js](./playgrounds/react-router-6-js/src/app.jsx)
+- [react-router-5](./playgrounds/react-router-5/src/app.tsx)
+- [react-router-5-js](./playgrounds/react-router-5-js/src/app.jsx)
+
+
+以及webpack.config.js:
+
+- [react-router-6](./playgrounds/react-router-6/webpack.config.js)
+- [react-router-6-js](./playgrounds/react-router-6-js/webpack.config.js)
+- [react-router-5](./playgrounds/react-router-5/webpack.config.js)
+- [react-router-5-js](./playgrounds/react-router-5-js/webpack.config.js)
 ## 📄 协议
 
 genetate-history-method-webpack-plugin 遵循 [MIT 协议](./LICENSE).
