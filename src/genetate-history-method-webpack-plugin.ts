@@ -148,6 +148,7 @@ export const useRouterHistory = () => {
   })
 
   useLayoutEffect(() => {
+    // @ts-ignore
     history.listen(setState)
   }, [history])
   return [history, state] ${isExistTS ? 'as [typeof history, typeof state]' : ''}
@@ -171,8 +172,10 @@ export const useSearchParams = ${isExistTS ? '<T = any>' : ''}() => {
 export function Router({ children }${isExistTS ? ':{children: ReactNode}' : ''}) {
   return (
     <BaseRouter
+      // @ts-ignore
       children={children}
-      history={originHistory${isExistTS ? ' as any' : ''}}
+      // @ts-ignore
+      history={originHistory}
     />
   )
 }`,
