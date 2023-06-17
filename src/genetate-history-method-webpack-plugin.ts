@@ -172,7 +172,7 @@ export function Router({ children }${isExistTS ? ':{children: ReactNode}' : ''})
   return (
     <BaseRouter
       children={children}
-      history={originHistory${isExistTS ? 'as any' : ''}}
+      history={originHistory${isExistTS ? ' as any' : ''}}
     />
   )
 }`,
