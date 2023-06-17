@@ -34,6 +34,14 @@ interface GenerateHistoryMethodWebpackPluginOptions {
    */
   originHistoryModuleName?: string
   /**
+   * @description the history name you want to custom
+   * @default history
+   * @example
+   * { exportHistoryName: 'myHistory' }
+   * import { myHistory } from '~history'
+   *  */
+  exportHistoryName?: string
+  /**
    * your pages path root
    * @example
    * path.resolve(cwdPath, 'src/pages') */
@@ -56,6 +64,8 @@ class GenerateHistoryMethodWebpackPlugin {
   mode: HistoryMode
   contents: string[] = []
   reactRouterVersion: AllowReactRouterVersion
+  exportHistoryName: string
+
   constructor(options: GenerateHistoryMethodWebpackPluginOptions) {
     const {
       paramsName = 'index.params',
@@ -63,6 +73,7 @@ class GenerateHistoryMethodWebpackPlugin {
       historyModuleName = '~history',
       originHistoryModuleName = 'history',
       mode = 'browser',
+      exportHistoryName = 'history',
       pagesRootPath,
       reactRouterVersion,
     } = options || {}
@@ -73,6 +84,7 @@ class GenerateHistoryMethodWebpackPlugin {
     this.pagesRootPath = pagesRootPath
     this.mode = mode
     this.reactRouterVersion = reactRouterVersion
+    this.exportHistoryName = exportHistoryName
   }
 
   get isHash() {
@@ -130,6 +142,7 @@ class GenerateHistoryMethodWebpackPlugin {
 
   addTopImport() {
     this.contents.push(
+      '// @eslint-ignored',
       'import React, { useLayoutEffect, useRef, useState, ReactNode } from \'react\'',
       'import { useLocation, Router as BaseRouter } from \'react-router-dom\'',
       `import originHistory from '${this.originHistoryModuleName}'`,
@@ -158,7 +171,7 @@ export const useRouterHistory = () => {
 
   generateUseSearchParamsHook(isExistTS: boolean) {
     this.contents.push(`
-export const useSearchParams = ${isExistTS ? '<T = any>' : ''}() => {
+export function useSearchParams${isExistTS ? '<T = any>' : ''}() {
   const { search } = useLocation()
   return qs.parse(search, { ignoreQueryPrefix: true }) ${isExistTS ? 'as T' : ''}
 }
@@ -278,10 +291,9 @@ export function Router({ children, basename }${isExistTS ? ': RouterProps' : ''}
       )
     }
     this.contents.unshift(...PathParamsTypeArrs)
-    this.contents.push('const history = {')
+    this.contents.push(`export const ${this.exportHistoryName} = {`)
     this.contents.push(...methods)
     this.contents.push('}\n')
-    this.contents.push('export default history')
   }
 }
 
