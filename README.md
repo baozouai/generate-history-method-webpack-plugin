@@ -126,11 +126,16 @@ const path = require('path')
 module.exports = {
   ...,
   plugins: [
-    new GenerateHistoryMethodWebpackPlugin({
-      pagesRootPath: path.resolve(process.cwd(), 'src/pages') // must required,
-      reactRouterVersion: 5 | 6
-    })
+    new GenerateHistoryMethodWebpackPlugin()
   ],
+}
+
+// new file .generate-history-method.config.js in your project root
+const path = require('path')
+module.exports = {
+  pagesRootPath: path.resolve(__dirname, 'src/pages'),
+  originHistoryModuleName: '@/browser_history',
+  reactRouterVersion: 6,
 }
 ```
 ![](./assets/option_example.png)

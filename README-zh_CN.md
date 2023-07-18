@@ -116,19 +116,22 @@ interface GenerateHistoryMethodWebpackPluginOptions {
 
 ```js
 // webpack.config.js
-// webpack.config.js
 const GenerateHistoryMethodWebpackPlugin = require('generate-history-method-webpack-plugin')
 const path = require('path')
 
 module.exports = {
   ...,
   plugins: [
-    new GenerateHistoryMethodWebpackPlugin({
-      pagesRootPath: path.resolve(process.cwd(),
-       'src/pages') // pagesRootPath必填,
-       reactRouterVersion: 5 | 6,
-    })
+    new GenerateHistoryMethodWebpackPlugin()
   ],
+}
+
+// 根目录新建 .generate-history-method.config.js
+const path = require('path')
+module.exports = {
+  pagesRootPath: path.resolve(__dirname, 'src/pages'),
+  originHistoryModuleName: '@/browser_history',
+  reactRouterVersion: 6,
 }
 ```
 ![](./assets/option_example.png)
