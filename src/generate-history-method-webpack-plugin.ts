@@ -3,6 +3,7 @@ import { dirname, extname, resolve } from 'path'
 import { validate } from 'schema-utils'
 import glob from 'glob'
 import schema from './schema.json'
+import { CONFIG_FILE_PATH } from './const'
 
 const cwdPath = process.cwd()
 
@@ -68,7 +69,26 @@ class GenerateHistoryMethodWebpackPlugin {
   reactRouterVersion: AllowReactRouterVersion
   exportHistoryName: string
 
-  constructor(options: GenerateHistoryMethodWebpackPluginOptions) {
+  getDefaultConfig() {
+    if (existsSync(CONFIG_FILE_PATH)) {
+      // @ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-var-requires
+      const config = require(CONFIG_FILE_PATH)
+      return config as GenerateHistoryMethodWebpackPluginOptions
+    }
+    return {}
+  }
+
+  combindConfig(config: GenerateHistoryMethodWebpackPluginOptions) {
+    const defaultConfig = this.getDefaultConfig()
+    return {
+      ...defaultConfig,
+      ...config,
+    }
+  }
+
+  constructor(options = {} as GenerateHistoryMethodWebpackPluginOptions) {
+    const combineOptions = this.combindConfig(options)
     const {
       paramsName = 'index.params',
       pageName = 'index.page',
@@ -78,10 +98,9 @@ class GenerateHistoryMethodWebpackPlugin {
       exportHistoryName = 'history',
       pagesRootPath,
       reactRouterVersion,
-    } = options || {}
-
+    } = combineOptions
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    validate(schema as any, options)
+    validate(schema as any, combineOptions)
     this.paramsName = paramsName
     this.pageName = pageName
     this.historyModuleName = historyModuleName
@@ -100,48 +119,52 @@ class GenerateHistoryMethodWebpackPlugin {
     return this.reactRouterVersion === 6
   }
 
+  run() {
+    const filePattern = `${this.pagesRootPath}/**/${this.pageName}.{tsx,js,jsx}` // 匹配的文件模式
+
+    glob(filePattern, (err, files) => {
+      if (err) {
+        console.warn(err)
+        return
+      }
+      const isExistTS = files.some(file => /\.tsx?/.test(extname(file)))
+      this.contents = []
+
+      this.addTopImport()
+      this.generateUseHistoryHook(isExistTS)
+      this.generateRouter(isExistTS)
+
+      const { urlObj, paramsMap } = this.getParamsMapAndUrlObj(files)
+      const urlKeys = Object.keys(urlObj)
+
+      this.generateURL_MAP(urlObj)
+      this.generateFormatUrlFn(isExistTS)
+      this.generateHistory(paramsMap, urlKeys, isExistTS)
+      this.generateUseSearchParamsHook(isExistTS)
+
+      this.contents.unshift('// @eslint-ignored')
+      const contentStr = this.contents.join('\n')
+      const outputPath = resolve(
+        cwdPath,
+              `node_modules/${this.historyModuleName}.${isExistTS ? 'tsx' : 'js'}`,
+      ) // 输出文件路径
+      if (existsSync(outputPath)) {
+        // 已存在则对比是否变化，没变化则没必要写入
+        const originFile = readFileSync(outputPath, 'utf-8')
+        if (originFile === contentStr)
+          return
+      }
+      writeFileSync(outputPath, contentStr)
+    })
+  }
+
   apply(compiler: any) {
     // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
     compiler.hooks.beforeCompile.tap(
       GenerateHistoryMethodWebpackPlugin.name,
       () => {
-        const filePattern = `${this.pagesRootPath}/**/${this.pageName}.{tsx,js,jsx}` // 匹配的文件模式
-
-        glob(filePattern, (err, files) => {
-          if (err) {
-            console.warn(err)
-            return
-          }
-          const isExistTS = files.some(file => /\.tsx?/.test(extname(file)))
-          this.contents = []
-
-          this.addTopImport()
-          this.generateUseHistoryHook(isExistTS)
-          this.generateRouter(isExistTS)
-
-          const { urlObj, paramsMap } = this.getParamsMapAndUrlObj(files)
-          const urlKeys = Object.keys(urlObj)
-
-          this.generateURL_MAP(urlObj)
-          this.generateFormatUrlFn(isExistTS)
-          this.generateHistory(paramsMap, urlKeys, isExistTS)
-          this.generateUseSearchParamsHook(isExistTS)
-
-          this.contents.unshift('// @eslint-ignored')
-          const contentStr = this.contents.join('\n')
-          const outputPath = resolve(
-            cwdPath,
-              `node_modules/${this.historyModuleName}.${isExistTS ? 'tsx' : 'js'}`,
-          ) // 输出文件路径
-          if (existsSync(outputPath)) {
-            // 已存在则对比是否变化，没变化则没必要写入
-            const originFile = readFileSync(outputPath, 'utf-8')
-            if (originFile === contentStr)
-              return
-          }
-          writeFileSync(outputPath, contentStr)
-        })
+        this.run()
       },
     )
   }

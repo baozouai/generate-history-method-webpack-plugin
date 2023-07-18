@@ -1,7 +1,7 @@
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const { DefinePlugin } = require('webpack')
-const GenerateHistoryMethodWebpackPlugin = require('../../dist/genetate-history-method-webpack-plugin.cjs')
+const GenerateHistoryMethodWebpackPlugin = require('../../dist/generate-history-method-webpack-plugin.cjs')
 const isHash = process.env.HISTORY_MODE === 'hash'
 module.exports = {
   entry: './src/index.tsx',

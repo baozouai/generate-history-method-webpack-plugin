@@ -90,6 +90,9 @@ importers:
       '@types/react-router-dom':
         specifier: 5.3.3
         version: 5.3.3
+      generate-history-method-webpack-plugin:
+        specifier: workspace:*
+        version: link:../..
       html-webpack-plugin:
         specifier: ^5.5.3
         version: 5.5.3(webpack@5.87.0)

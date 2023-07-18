@@ -1,17 +1,20 @@
 {
-  "name": "genetate-history-method-webpack-plugin",
+  "name": "generate-history-method-webpack-plugin",
   "version": "1.2.1",
   "packageManager": "pnpm@8.3.1",
   "description": "A webpack Plugin for automatically generating routing methods based on conventional routing",
   "author": "baozouai <baozouai@gmail.com>",
   "license": "MIT",
-  "homepage": "https://github.com/baozouai/genetate-history-method-webpack-plugin",
+  "homepage": "https://github.com/baozouai/generate-history-method-webpack-plugin",
   "repository": {
     "type": "git",
-    "url": "https://github.com/baozouai/genetate-history-method-webpack-plugin.git"
+    "url": "https://github.com/baozouai/generate-history-method-webpack-plugin.git"
   },
   "bugs": {
-    "url": "https://github.com/baozouai/genetate-history-method-webpack-plugin/issues"
+    "url": "https://github.com/baozouai/generate-history-method-webpack-plugin/issues"
+  },
+  "bin": {
+    "generate-history-method": "dist/generate-history-method.cjs"
   },
   "keywords": [
     "webpack",
@@ -20,9 +23,9 @@
     "webpack-plugin",
     "add react history method"
   ],
-  "main": "dist/genetate-history-method-webpack-plugin.cjs",
-  "types": "dist/genetate-history-method-webpack-plugin.d.ts",
-  "module": "./dist/genetate-history-method-webpack-plugin.mjs",
+  "main": "dist/generate-history-method-webpack-plugin.cjs",
+  "types": "dist/generate-history-method-webpack-plugin.d.ts",
+  "module": "./dist/generate-history-method-webpack-plugin.mjs",
   "files": [
     "dist"
   ],

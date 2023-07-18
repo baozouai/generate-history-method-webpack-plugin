@@ -1,6 +1,6 @@
 
 <p align="center">
-<h1 align="center">genetate-history-method-webpack-plugin</h1>
+<h1 align="center">generate-history-method-webpack-plugin</h1>
 </p>
 
 <div align="center">
@@ -11,15 +11,15 @@
 ![Test][test-badge]
 
 
-[npm-image]: https://img.shields.io/npm/v/genetate-history-method-webpack-plugin.svg?style=flat-square
-[npm-url]: http://npmjs.org/package/genetate-history-method-webpack-plugin
+[npm-image]: https://img.shields.io/npm/v/generate-history-method-webpack-plugin.svg?style=flat-square
+[npm-url]: http://npmjs.org/package/generate-history-method-webpack-plugin
 
 
-[download-image]: https://img.shields.io/npm/dm/genetate-history-method-webpack-plugin.svg?style=flat-square
+[download-image]: https://img.shields.io/npm/dm/generate-history-method-webpack-plugin.svg?style=flat-square
 
 
 
-[test-badge]: https://github.com/baozouai/genetate-history-method-webpack-plugin/actions/workflows/ci.yml/badge.svg
+[test-badge]: https://github.com/baozouai/generate-history-method-webpack-plugin/actions/workflows/ci.yml/badge.svg
 
 
 
@@ -30,11 +30,11 @@
 ## 📦  安装
 
 ```sh
-pnpm add genetate-history-method-webpack-plugin -D
+pnpm add generate-history-method-webpack-plugin -D
 # or
-yarn add genetate-history-method-webpack-plugin -D
+yarn add generate-history-method-webpack-plugin -D
 # or
-npm i genetate-history-method-webpack-plugin -D
+npm i generate-history-method-webpack-plugin -D
 ```
 
 确保你的依赖有`qs`，否则请安装
@@ -117,7 +117,7 @@ interface GenerateHistoryMethodWebpackPluginOptions {
 ```js
 // webpack.config.js
 // webpack.config.js
-const GenerateHistoryMethodWebpackPlugin = require('genetate-history-method-webpack-plugin')
+const GenerateHistoryMethodWebpackPlugin = require('generate-history-method-webpack-plugin')
 const path = require('path')
 
 module.exports = {
@@ -168,4 +168,4 @@ export default interface Params {
 - [react-router-5-js](./playgrounds/react-router-5-js/webpack.config.js)
 ## 📄 协议
 
-genetate-history-method-webpack-plugin 遵循 [MIT 协议](./LICENSE).
+generate-history-method-webpack-plugin 遵循 [MIT 协议](./LICENSE).
