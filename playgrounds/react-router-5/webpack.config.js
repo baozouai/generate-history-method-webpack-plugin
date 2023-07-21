@@ -37,9 +37,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: 'public/index.html',
     }),
-    new GenerateHistoryMethodWebpackPlugin({
-      originHistoryModuleName: isHash ? '@/hash_history' : '@/browser_history',
-    }),
+    new GenerateHistoryMethodWebpackPlugin(),
     // ...其他插件
   ],
   devServer: {

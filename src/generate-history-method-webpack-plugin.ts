@@ -68,7 +68,7 @@ class GenerateHistoryMethodWebpackPlugin {
   contents: string[] = []
   reactRouterVersion: AllowReactRouterVersion
   exportHistoryName: string
-
+  isExistTS = false
   getDefaultConfig() {
     if (existsSync(CONFIG_FILE_PATH)) {
       // @ts-ignore
@@ -115,8 +115,13 @@ class GenerateHistoryMethodWebpackPlugin {
     return this.mode === 'hash'
   }
 
-  get iVersion6() {
-    return this.reactRouterVersion === 6
+  apply(compiler: any) {
+    // @ts-ignore
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+    compiler.hooks.beforeCompile.tap(
+      GenerateHistoryMethodWebpackPlugin.name,
+      () => this.run(),
+    )
   }
 
   run() {
@@ -127,46 +132,25 @@ class GenerateHistoryMethodWebpackPlugin {
         console.warn(err)
         return
       }
-      const isExistTS = files.some(file => /\.tsx?/.test(extname(file)))
+      this.isExistTS = files.some(file => /\.tsx?/.test(extname(file)))
       this.contents = []
 
       this.addTopImport()
-      this.generateUseHistoryHook(isExistTS)
-      this.generateRouter(isExistTS)
+      this.generateUseHistoryHook()
+      this.generateUseSearchParamsHook()
+      this.generateRouter()
 
       const { urlObj, paramsMap } = this.getParamsMapAndUrlObj(files)
-      const urlKeys = Object.keys(urlObj)
+      const formatUrls = Object.keys(urlObj)
 
       this.generateURL_MAP(urlObj)
-      this.generateFormatUrlFn(isExistTS)
-      this.generateHistory(paramsMap, urlKeys, isExistTS)
-      this.generateUseSearchParamsHook(isExistTS)
+      this.generateFormatUrlFn()
+      this.generateHistory(paramsMap, formatUrls)
 
-      this.contents.unshift('// @eslint-ignored')
-      const contentStr = this.contents.join('\n')
-      const outputPath = resolve(
-        cwdPath,
-              `node_modules/${this.historyModuleName}.${isExistTS ? 'tsx' : 'js'}`,
-      ) // 输出文件路径
-      if (existsSync(outputPath)) {
-        // 已存在则对比是否变化，没变化则没必要写入
-        const originFile = readFileSync(outputPath, 'utf-8')
-        if (originFile === contentStr)
-          return
-      }
-      writeFileSync(outputPath, contentStr)
+      this.contents.unshift('/* eslint-disable */')
+
+      this.generateFile()
     })
-  }
-
-  apply(compiler: any) {
-    // @ts-ignore
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-    compiler.hooks.beforeCompile.tap(
-      GenerateHistoryMethodWebpackPlugin.name,
-      () => {
-        this.run()
-      },
-    )
   }
 
   addTopImport() {
@@ -178,7 +162,7 @@ class GenerateHistoryMethodWebpackPlugin {
     )
   }
 
-  generateUseHistoryHook(isExistTS: boolean) {
+  generateUseHistoryHook() {
     this.contents.push(`
 export const useRouterHistory = () => {
   const historyRef = useRef(originHistory)
@@ -192,12 +176,13 @@ export const useRouterHistory = () => {
     // @ts-ignore
     history.listen(setState)
   }, [history])
-  return [history, state] ${isExistTS ? 'as [typeof history, typeof state]' : ''}
+  return [history, state] ${this.isExistTS ? 'as [typeof history, typeof state]' : ''}
 }
           `)
   }
 
-  generateUseSearchParamsHook(isExistTS: boolean) {
+  generateUseSearchParamsHook() {
+    const isExistTS = this.isExistTS
     this.contents.push(`
 export function useSearchParams${isExistTS ? '<T = any>' : ''}() {
   const { search } = useLocation()
@@ -206,11 +191,12 @@ export function useSearchParams${isExistTS ? '<T = any>' : ''}() {
           `)
   }
 
-  generateRouter(isExistTS: boolean) {
+  generateRouter() {
+    const isExistTS = this.isExistTS
     switch (this.reactRouterVersion) {
       case 5:
         this.contents.push(`
-export function Router({ children }${isExistTS ? ':{children: ReactNode}' : ''}) {
+export function Router({ children }${isExistTS ? ':{ children: ReactNode }' : ''}) {
   return (
     <BaseRouter
       // @ts-ignore
@@ -229,7 +215,7 @@ ${isExistTS
   basename?: string;
   children?: ReactNode;
 }`
- : ''}
+: ''}
 export function Router({ children, basename }${isExistTS ? ': RouterProps' : ''}) {
   const [history, { action, location }] = useRouterHistory()
   // 一般变化的就是action和location
@@ -255,16 +241,28 @@ export function Router({ children, basename }${isExistTS ? ': RouterProps' : ''}
   }
 
   getParamsMapAndUrlObj(files: string[]) {
+    // { formatPath => paramsPath }
     const paramsMap: Record<string, string> = {}
     const regExp = new RegExp(`\/${this.pageName.replace(/(?=\.)/g, '\\')}\.(tsx|jsx?)$`)
+    // { formatPath => urlPath }
     const urlObj = files.reduce<Record<string, string>>((pre, path) => {
+      // eg: path: Users/xxx/project/src/pages/order/ ~ q/index.page.tsx
       const urlPath = path
+      // eg: /order/ ~ q/index.page.tsx
         .replace(this.pagesRootPath, '')
+        // eg: /order/ ~ q/index.page.tsx => /order/ ~ q
         .replace(regExp, '') || '/'
       const formatPath = urlPath
+      // eg: /order/ ~ q => order/ ~ q
         .slice(1)
+        // eg: order/~ q => ORDER/ ~ Q
         .toUpperCase()
-        .replace(/\//g, '_') || '$INDEX' // 首页
+        // eg: ORDER/ ~ Q => ORDER/~Q
+        .replace(/\s/g, '')
+        // eg: ORDER/~Q => ORDER__Q
+        .replace(/[^\w]/g, '_')
+        // eg: ORDER__Q => ORDER_Q
+        .replace(/_{2,}/g, '_') || '$INDEX' // 首页
 
       pre[formatPath] = urlPath
       const dir = dirname(path)
@@ -285,43 +283,73 @@ export function Router({ children, basename }${isExistTS ? ': RouterProps' : ''}
     )
   }
 
-  generateFormatUrlFn(isExistTS: boolean) {
+  generateFormatUrlFn() {
+    const isExistTS = this.isExistTS
     this.contents.push(
       `const formatUrlFn = (path${isExistTS ? ': string' : ''}, query${isExistTS ? ': any' : ''}) => path + (query ? \'?\' + qs.stringify(query || {}): \'\')`,
     )
   }
 
-  generateHistory(paramsMap: Record<string, string>, urlKeys: string[], isExistTS: boolean) {
+  generateHistory(paramsMap: Record<string, string>, formatUrls: string[]) {
+    const isExistTS = this.isExistTS
     const methods: string[] = []
     const PathParamsTypeArrs: string[] = []
-    for (const urlKey of urlKeys) {
-      if (paramsMap[urlKey]) {
+
+    for (const formatUrl of formatUrls) {
+      const possibleParamsPath = paramsMap[formatUrl]
+      if (possibleParamsPath) {
         PathParamsTypeArrs.push(
-                  `import ${urlKey}_Params from '${paramsMap[urlKey]}'`,
+                  `import ${formatUrl}_Params from '${possibleParamsPath}'`,
         )
       }
       let queryType = ''
       if (isExistTS)
-        queryType = `?: ${paramsMap[urlKey] ? `${urlKey}_Params` : 'any'}`
+        queryType = `?: ${possibleParamsPath ? `${formatUrl}_Params` : 'any'}`
 
-      const realUrl = `URL_MAP['${urlKey}']`
+      const realUrl = `URL_MAP['${formatUrl}']`
 
       methods.push(
-                `  TO_${urlKey}: (query${queryType}) => {
+                `  TO_${formatUrl}: (query${queryType}) => {
       originHistory.push(formatUrlFn(${realUrl}, query))
     },`,
-                `  OPEN_${urlKey}: (query${queryType}) => {
+                `  OPEN_${formatUrl}: (query${queryType}) => {
       window.open(formatUrlFn('${this.isHash ? '#' : ''}' + ${realUrl}, query))
     },`,
-                `  REPLACE_${urlKey}: (query${queryType}) => {
+                `  REPLACE_${formatUrl}: (query${queryType}) => {
       originHistory.replace(formatUrlFn(${realUrl}, query))
     },`,
       )
+      if (isExistTS && possibleParamsPath) {
+        methods.push(
+          `  use${formatUrl}_PARAMS: () => useSearchParams${`<${formatUrl}_Params>`}(),`,
+        )
+      }
     }
+
     this.contents.unshift(...PathParamsTypeArrs)
     this.contents.push(`export const ${this.exportHistoryName} = {`)
     this.contents.push(...methods)
     this.contents.push('}\n')
+  }
+
+  generateFile() {
+    const contentStr = this.contents.join('\n')
+    const possibleOutputPath = ['tsx', 'js'].map(ext => resolve(
+      cwdPath,
+              `node_modules/${this.historyModuleName}.${ext}`,
+    ))
+
+    const outputPath = resolve(
+      cwdPath,
+              `node_modules/${this.historyModuleName}.${this.isExistTS ? 'tsx' : 'js'}`,
+    )
+    if (existsSync(outputPath)) {
+      // 已存在则对比是否变化，没变化则没必要写入
+      const originFile = readFileSync(outputPath, 'utf-8')
+      if (originFile === contentStr)
+        return
+    }
+    writeFileSync(outputPath, contentStr)
   }
 }
 

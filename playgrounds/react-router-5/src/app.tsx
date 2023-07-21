@@ -90,7 +90,7 @@ function Layout() {
         </li>
         <li
           style={commonLiStyle}
-          onClick={() => history.OPEN_MY()}
+          onClick={() => history.REPLACE_MY()}
         >
           REPLACE_MY
         </li>
@@ -100,7 +100,7 @@ function Layout() {
     {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       routePaths.filter(({ path }) => !['/order', '/order/detail', '/my'].includes(path)).map(({ path }) => {
-        const name = path.slice(1).toUpperCase().replace(/\//g, '_')
+        const name = path.slice(1).toUpperCase().replace(/\s/g, '').replace(/[^\w]/g, '_').replace(/_{2,}/g, '_')
         return (
           <ul key={name}>
         <li

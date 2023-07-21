@@ -23,12 +23,13 @@
     "@types/react-dom": "^18.2.5",
     "@types/react-router": "5.1.20",
     "@types/react-router-dom": "5.3.3",
+    "babel-loader": "^9.1.2",
+    "generate-history-method-webpack-plugin": "workspace:*",
     "html-webpack-plugin": "^5.5.3",
     "ts-loader": "^9.4.3",
     "typescript": "^4.9.5",
     "webpack": "^5.87.0",
     "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^4.15.1",
-    "generate-history-method-webpack-plugin": "workspace:*"
+    "webpack-dev-server": "^4.15.1"
   }
 }
