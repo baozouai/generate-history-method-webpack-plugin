@@ -1,7 +1,9 @@
-import { existsSync, readFileSync, writeFileSync } from 'fs'
+import { existsSync, writeFileSync } from 'fs'
 import { dirname, extname, resolve } from 'path'
 import { validate } from 'schema-utils'
+import choidar from 'chokidar'
 import glob from 'glob'
+import { debounce } from 'throttle-debounce'
 import schema from './schema.json'
 import { CONFIG_FILE_PATH } from './const'
 
@@ -9,6 +11,7 @@ const cwdPath = process.cwd()
 
 type HistoryMode = 'hash' | 'browser'
 type AllowReactRouterVersion = 5 | 6
+
 interface GenerateHistoryMethodWebpackPluginOptions {
   /**
    * @description The name of the file defining the route parameter type, must be .ts
@@ -115,12 +118,42 @@ class GenerateHistoryMethodWebpackPlugin {
     return this.mode === 'hash'
   }
 
+  get watchFileReg() {
+    /**
+     * pageName: allow .jsx?, .tsx
+     * paramsName: allow .ts
+     */
+    return new RegExp(`(${this.pageName}\.(jsx?|tsx)|${this.paramsName}\.ts)$`)
+  }
+
   apply(compiler: any) {
-    // @ts-ignore
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-    compiler.hooks.beforeCompile.tap(
+    compiler.hooks.initialize.tap(
       GenerateHistoryMethodWebpackPlugin.name,
-      () => this.run(),
+      () => {
+        this.run()
+
+        const debounceFn = debounce(20, () => this.run()) as () => void
+
+        const judgeFilter = (filePath: string) => {
+          if (!this.watchFileReg.test(filePath))
+            return
+          console.log('-------------------> filePath: ', filePath)
+          debounceFn()
+        }
+        const watcher = choidar.watch(this.pagesRootPath, {
+          ignoreInitial: true,
+        })
+        watcher.on('all', (eventName, filePath) => {
+          switch (eventName) {
+            case 'add':
+            case 'unlink':
+              console.log('-------------------> eventName: ', eventName)
+
+              judgeFilter(filePath)
+          }
+        })
+      },
     )
   }
 
@@ -142,7 +175,7 @@ class GenerateHistoryMethodWebpackPlugin {
 
       const { urlObj, paramsMap } = this.getParamsMapAndUrlObj(files)
       const formatUrls = Object.keys(urlObj)
-
+      console.log(formatUrls)
       this.generateURL_MAP(urlObj)
       this.generateFormatUrlFn()
       this.generateHistory(paramsMap, formatUrls)
@@ -258,7 +291,7 @@ export function Router({ children, basename }${isExistTS ? ': RouterProps' : ''}
         // eg: order/~ q => ORDER/ ~ Q
         .toUpperCase()
         // eg: ORDER/ ~ Q => ORDER/~Q
-        .replace(/\s/g, '')
+        .replace(/^\s*|\s*$/g, '')
         // eg: ORDER/~Q => ORDER__Q
         .replace(/[^\w]/g, '_')
         // eg: ORDER__Q => ORDER_Q
@@ -343,12 +376,14 @@ export function Router({ children, basename }${isExistTS ? ': RouterProps' : ''}
       cwdPath,
               `node_modules/${this.historyModuleName}.${this.isExistTS ? 'tsx' : 'js'}`,
     )
-    if (existsSync(outputPath)) {
-      // 已存在则对比是否变化，没变化则没必要写入
-      const originFile = readFileSync(outputPath, 'utf-8')
-      if (originFile === contentStr)
-        return
-    }
+    // if (existsSync(outputPath)) {
+    //   // 已存在则对比是否变化，没变化则没必要写入
+    //   const originFile = readFileSync(outputPath, 'utf-8')
+    //   if (originFile === contentStr)
+    //     return
+    // }
+    console.log('%c --------------> writeFileSync', 'color:red')
+
     writeFileSync(outputPath, contentStr)
   }
 }

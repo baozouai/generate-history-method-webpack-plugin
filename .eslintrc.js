@@ -6,5 +6,6 @@ module.exports = {
     '@typescript-eslint/ban-ts-comment': 'off',
     '@typescript-eslint/prefer-ts-expect-error': 'off',
     'unicorn/prefer-node-protocol': 'off',
+    'no-console': 'off'
   }
 }

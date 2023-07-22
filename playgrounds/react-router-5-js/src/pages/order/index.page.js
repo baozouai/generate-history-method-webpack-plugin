@@ -6,6 +6,6 @@ export default () => {
   const params = useSearchParams()
   console.log(params, params.customer_names)
   return (
-    <div>这是order</div>
+    <div>这是order11</div>
   )
 }

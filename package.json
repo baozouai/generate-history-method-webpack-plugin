@@ -47,8 +47,10 @@
     "demo6:js:hash": "nr -C playgrounds/react-router-6-js start:hash"
   },
   "dependencies": {
+    "chokidar": "^3.5.3",
     "glob": "7.2.0",
-    "schema-utils": "^4.2.0"
+    "schema-utils": "^4.2.0",
+    "throttle-debounce": "^5.0.0"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.36.0",
@@ -56,6 +58,7 @@
     "@commitlint/config-conventional": "^17.4.4",
     "@types/glob": "7.2.0",
     "@types/node": "^18.15.13",
+    "@types/throttle-debounce": "^5.0.0",
     "bumpp": "^9.1.0",
     "cross-env": "^7.0.3",
     "cz-conventional-changelog": "^3.3.0",
@@ -65,7 +68,8 @@
     "pnpm": "^8.3.1",
     "simple-git-hooks": "^2.8.1",
     "typescript": "^5.1.3",
-    "unbuild": "^1.2.1"
+    "unbuild": "^1.2.1",
+    "webpack": "^5.87.0"
   },
   "husky": {
     "hooks": {
