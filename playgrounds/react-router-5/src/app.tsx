@@ -3,6 +3,7 @@ import {
   Switch,
 } from 'react-router-dom'
 import { Router, history } from '~history'
+
 const context = require.context('@/pages', true, /index\.page\./)
 
 const routePaths = context.keys().map((path: string) => {
@@ -38,6 +39,8 @@ function Layout() {
             order_id: '123',
             enter_order_type: 'OPEN',
             customer_names: ['name1', 'name2'],
+            type: 1,
+            isAuto: true,
           })}
         >
           TO_ORDER

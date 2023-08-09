@@ -276,6 +276,7 @@ export function Router({ children, basename }${isExistTS ? ': RouterProps' : ''}
   getParamsMapAndUrlObj(files: string[]) {
     // { formatPath => paramsPath }
     const paramsMap: Record<string, string> = {}
+    // new RegExp(`\/${'index.page'.replace(/(?=\.)/g, '\\')}\.(tsx|jsx?)$`) => /\/index\.page.(tsx|jsx?)$/
     const regExp = new RegExp(`\/${this.pageName.replace(/(?=\.)/g, '\\')}\.(tsx|jsx?)$`)
     // { formatPath => urlPath }
     const urlObj = files.reduce<Record<string, string>>((pre, path) => {

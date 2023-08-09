@@ -4,4 +4,6 @@ export default interface Params {
   /** 随便写的订单类型 */
   enter_order_type: 'OPEN' | 'TO' | 'REPLACE'
   customer_names: string[]
+  type?: 1 | 2
+  isAuto?: boolean
 }
