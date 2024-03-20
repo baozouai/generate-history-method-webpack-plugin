@@ -106,6 +106,10 @@ class GenerateHistoryMethodWebpackPlugin {
     this.historyModuleName = historyModuleName
     this.originHistoryModuleName = originHistoryModuleName
     this.pagesRootPath = pagesRootPath
+    if (this.pagesRootPath.includes('\\'))
+      this.pagesRootPath = this.pagesRootPath.replace(/\\/g, '\/')
+
+
     this.mode = mode
     this.reactRouterVersion = reactRouterVersion
     this.exportHistoryName = exportHistoryName
@@ -243,7 +247,7 @@ export function Router({ children, basename }${isExistTS ? ': RouterProps' : ''}
   getParamsMapAndUrlObj(files: string[]) {
     // { formatPath => paramsPath }
     const paramsMap: Record<string, string> = {}
-    const regExp = new RegExp(`\/${this.pageName.replace(/(?=\.)/g, '\\')}\.(tsx|jsx?)$`)
+    const regExp = new RegExp(`[\/\\\\]${this.pageName.replace(/(?=\.)/g, '\\')}\.(tsx|jsx?)$`)
     // { formatPath => urlPath }
     const urlObj = files.reduce<Record<string, string>>((pre, path) => {
       // eg: path: Users/xxx/project/src/pages/order/ ~ q/index.page.tsx
@@ -263,7 +267,6 @@ export function Router({ children, basename }${isExistTS ? ': RouterProps' : ''}
         .replace(/[^\w]/g, '_')
         // eg: ORDER__Q => ORDER_Q
         .replace(/_{2,}/g, '_') || '$INDEX' // 首页
-
       pre[formatPath] = urlPath
       const dir = dirname(path)
       const possibleParamsPath = resolve(
@@ -271,7 +274,7 @@ export function Router({ children, basename }${isExistTS ? ': RouterProps' : ''}
                 `${this.paramsName}.ts`,
       )
       if (existsSync(possibleParamsPath))
-        paramsMap[formatPath] = possibleParamsPath.replace('.ts', '')
+        paramsMap[formatPath] = possibleParamsPath.replace(/\\/g, '\/').replace('.ts', '')
       return pre
     }, {})
     return { paramsMap, urlObj }
